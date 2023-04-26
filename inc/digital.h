@@ -27,8 +27,8 @@ SPDX-License-Identifier: MIT
  ** \date ??/04/23
  ** \brief Declaraciones publicas del modulo digital
  **
- ** \addtogroup alumno digital.h
- ** \brief Modulo para
+ ** \addtogroup digital digital.h
+ ** \brief Capa de abstracción de hardware para Entradas y Salidas Digitales
  ** @{ */
 
 /* === Headers files inclusions ================================================================ */
@@ -42,46 +42,79 @@ extern "C" {
 /* === Public macros definitions =============================================================== */
 
 #include <stdint.h>
-
-/**
- * @brief Define el tamaño de los campos de texto
- *
- * Este parametro define el tamaño de los campos de texto de la
- * estructura \ref alumno_s "alumno_s"
- */
-#define FIELD_SIZE 50
-
+#include <stdbool.h>
 
 #ifndef NUMBER_OF_OUTPUTS
     /**
      * @brief Define el numero de salidas 
      *
      * Este parametro define el numero de salidas en caso que no se haya definido antes una
-     * cantidad especifica \ref alumno_s "alumno_s"
+     * cantidad especifica \ref digital_output_s "digital_output_s"
      */
     #define NUMBER_OF_OUTPUTS 4
 #endif
+
+#ifndef NUMBER_OF_INPUTS
+    /**
+     * @brief Define el numero de entradas 
+     *
+     * Este parametro define el numero de entradas en caso que no se haya definido antes una
+     * cantidad especifica \ref digital_input_s "digital_input_s"
+     */
+    #define NUMBER_OF_INPUTS 4
+#endif
 /* === Public data type declarations =========================================================== */
 
-//! Estructura anonima para almacenar datos del alumno con campos desconocidos
+//! Estructura anonima para almacenar datos de las Salidas Digitales con campos desconocidos
 typedef struct digital_output_s * digital_output_t;
+
+//! Estructura anonima para almacenar datos de las Entradas Digitales con campos desconocidos
+typedef struct digital_input_s * digital_input_t;
 
 /* === Public variable declarations ============================================================ */
 
 /* === Public function declarations ============================================================ */
 
-//! Casi equivalente a Chip_SCU_PinMuxSet
-digital_output_t DigitalOutputCreate(uint8_t port, //!< Puntero que recibe el apellido del alumno
-                                   uint8_t pin /*!< Entero que recibe el documento del alumno */);
+//! Funcion para recibir datos de las Entradas Digitales y crearlas de forma Estatica
+digital_input_t DigitalInputCreate(uint8_t port, //!< Numero de Puerto GPIO al que esta conectada la Entrada Digital
+                                    uint8_t pin, //!< Numero de Pin GPIO al que esta conectada la Entrada Digital
+                                    bool inverted /*!< Boolenao que indica si la entrada sera pullup o pulldown */);
 
-//! Casi equivalente a Chip_GPIO_SetPinState
-void DigitalOutputActivate (digital_output_t output);
 
-//! Casi equivalente a Chip_GPIO_SetPinState
-void DigitalOutputDeactivate (digital_output_t output);
+//! Funcion para recibir datos de las Salidas Digitales y crearlas de forma Estatica
+digital_output_t DigitalOutputCreate(uint8_t port, //!<  Numero de Puerto GPIO al que esta conectada la Salida Digital
+                                     uint8_t pin /*!< Numero de Pin GPIO al que esta conectada la Salida Digital */);
 
-//! Casi equivalente a Chip_GPIO_SetPinState
-void DigitalOutputToggle (digital_output_t output);
+/** 
+ * @brief Funcion que chequea si la entrada esta activa o inactiva
+ * 
+ * @param input Puntero a la estructura de las Entradas Digitales
+ * @return true La entrada esta activa
+ * @return false La entrada esta inactiva
+ */
+bool DigitalInputGetState (digital_input_t input /*!< */ );
+
+/** 
+ * @brief Funcion que chequea si la entrada fue activada
+ * 
+ * @param input Puntero a la estructura de las Entradas Digitales
+ * @return true La entrada esta activada
+ * @return false La entrada no esta activada
+ */
+bool DigitalInputHasActivated(digital_input_t input /*!< */ );
+
+// void DigitalInputHasDeactivated(digital_input_t input);
+
+// void DigitalInputHasChanged(digital_input_t input);
+
+//! Funcion que activa la Salida Digital
+void DigitalOutputActivate (digital_output_t output /*!< */ );
+
+//! Funcion que desactiva la Salida Digital
+void DigitalOutputDeactivate (digital_output_t output /*!< */ );
+
+//! Funcion que conmuta la Salida Digital
+void DigitalOutputToggle (digital_output_t output /*!< */ );
     
 /* === End of documentation ==================================================================== */
 

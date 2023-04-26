@@ -32,10 +32,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** \brief Simple sample of use LPC HAL gpio functions
+/**
+ ** \author Balthazar Martin
+ ** \date ??/04/23
+ ** \brief Implimentacion publica para utilizar Entradas y Salidas Digitales
  **
- ** \addtogroup samples Sample projects
- ** \brief Sample projects to use as a starting point
+ ** \addtogroup tp4 TP4-main.c
+ ** \brief Cuarto Trabajo Practico
  ** @{ */
 
 /* === Headers files inclusions =============================================================== */
@@ -45,6 +48,8 @@
 #include <stdbool.h>
 
 /* === Macros definitions ====================================================================== */
+
+//https://www.proyecto-ciaa.com.ar/devwiki/lib/exe/fetch.php?media=desarrollo:edu-ciaa:edu-ciaa-nxp_pinout_a4_v4r2_es.pdf
 
 #define LED_R_PORT 2
 #define LED_R_PIN 0
@@ -126,8 +131,13 @@ int main(void) {
     digital_output_t led_rojo;
     digital_output_t led_verde;
 
+    digital_input_t TEC_1;
+    digital_input_t TEC_2;
+    digital_input_t TEC_3;
+    digital_input_t TEC_4;
+
     int divisor = 0;
-    bool current_state, last_state = false;
+    //bool current_state, last_state = false;
 
     Chip_SCU_PinMuxSet(LED_R_PORT, LED_R_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | LED_R_FUNC);
     Chip_GPIO_SetPinState(LPC_GPIO_PORT, LED_R_GPIO, LED_R_BIT, false);
@@ -160,19 +170,24 @@ int main(void) {
 
     /******************/
     Chip_SCU_PinMuxSet(TEC_1_PORT, TEC_1_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_PULLUP | TEC_1_FUNC);
-    Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, TEC_1_GPIO, TEC_1_BIT, false);
+    //Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, TEC_1_GPIO, TEC_1_BIT, false);
+    TEC_1=DigitalInputCreate(TEC_1_GPIO, TEC_1_BIT, true);
+
 
     Chip_SCU_PinMuxSet(TEC_2_PORT, TEC_2_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_PULLUP | TEC_2_FUNC);
-    Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, TEC_2_GPIO, TEC_2_BIT, false);
+    //Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, TEC_2_GPIO, TEC_2_BIT, false);
+    TEC_2=DigitalInputCreate(TEC_2_GPIO, TEC_2_BIT, true);
 
     Chip_SCU_PinMuxSet(TEC_3_PORT, TEC_3_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_PULLUP | TEC_3_FUNC);
-    Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, TEC_3_GPIO, TEC_3_BIT, false);
+    //Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, TEC_3_GPIO, TEC_3_BIT, false);
+    TEC_3=DigitalInputCreate(TEC_3_GPIO, TEC_3_BIT, true);
 
     Chip_SCU_PinMuxSet(TEC_4_PORT, TEC_4_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_PULLUP | TEC_4_FUNC);
-    Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, TEC_4_GPIO, TEC_4_BIT, false);
+    //Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, TEC_4_GPIO, TEC_4_BIT, false);
+    TEC_4=DigitalInputCreate(TEC_4_GPIO, TEC_4_BIT, true);
 
     while (true) {
-        if (Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, TEC_1_GPIO, TEC_1_BIT) == 0) {
+        if (DigitalInputGetState(TEC_1)/*Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, TEC_1_GPIO, TEC_1_BIT  == 0 */) {
             //Chip_GPIO_SetPinState(LPC_GPIO_PORT, LED_B_GPIO, LED_B_BIT, true);
             DigitalOutputActivate(led_azul);
         } else {
@@ -180,18 +195,18 @@ int main(void) {
             DigitalOutputDeactivate(led_azul);
         }
 
-        current_state = (Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, TEC_2_GPIO, TEC_2_BIT) == 0);
-        if ((current_state) && (!last_state)) {
+        //current_state = (DigitalInputGetState(TEC_2) /*Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, TEC_2_GPIO, TEC_2_BIT) == 0*/);
+        if ( DigitalInputHasActivated(TEC_2) /*(current_state) && ( !last_state crear funcion?  )*/ ) {
             //Chip_GPIO_SetPinToggle(LPC_GPIO_PORT, LED_1_GPIO, LED_1_BIT);
             DigitalOutputToggle(led_rojo);
         }
-        last_state = current_state;
+        //last_state = current_state;
 
-        if (Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, TEC_3_GPIO, TEC_3_BIT) == 0) {
+        if (DigitalInputGetState(TEC_3)/*Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, TEC_3_GPIO, TEC_3_BIT) == 0*/) {
             //Chip_GPIO_SetPinState(LPC_GPIO_PORT, LED_2_GPIO, LED_2_BIT, true);
             DigitalOutputActivate(led_amarillo);
         }
-        if (Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, TEC_4_GPIO, TEC_4_BIT) == 0) {
+        if (DigitalInputGetState(TEC_4)/*Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, TEC_4_GPIO, TEC_4_BIT) == 0*/) {
             //Chip_GPIO_SetPinState(LPC_GPIO_PORT, LED_2_GPIO, LED_2_BIT, false);
             DigitalOutputDeactivate(led_amarillo);
         }

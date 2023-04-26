@@ -24,8 +24,8 @@ SPDX-License-Identifier: MIT
  ** \date ??/04/23
  ** \brief Implementacion del modulo digital
  **
- ** \addtogroup Alumno Alumnos.c
- ** \brief Modulo para gestion de alumnos
+ ** \addtogroup Digital Digital.c
+ ** \brief Capa de abstracción de hardware para Entradas y Salidas Digitales
  ** @{ */
 
 /* === Headers files inclusions =============================================================== */
@@ -41,11 +41,21 @@ SPDX-License-Identifier: MIT
 
 
 /* === Private data type declarations ========================================================== */
-//! Estructura SOLO para almacenar datos del alumno
+
+//! Estructura que solo almacena informacion sobre las Salidas Digitales
 struct digital_output_s {
-    uint8_t port; //!< Almacena el apellido del alumno
-    uint8_t pin;  //!< Booleano que indica si la estructura esta vacia o no
-    bool ocupado;
+    uint8_t port; //!< Numero de Puerto GPIO al que esta conectada la Salida Digital
+    uint8_t pin;  //!< Numero de Pin GPIO al que esta conectada la Salida Digital
+    bool ocupado; //!< Booleano que indica si la estructura esta vacia o no
+};
+
+//! Estructura que solo almacena informacion sobre las Entradas Digitales
+struct digital_input_s {
+    uint8_t port; //!< Numero de Puerto GPIO al que esta conectada la Entrada Digital
+    uint8_t pin;  //!< Numero de Pin GPIO al que esta conectada la Entrada Digital
+    bool ocupado; //!< Booleano que indica si la estructura esta vacia o no
+    bool inverted; //!< Boolenao que indica si la entrada sera pullup o pulldown
+    bool last_state; //!< Booleano que almacena el ultimo estado en el que se encontro la entrada
 };
 
 /* === Private variable declarations =========================================================== */
@@ -60,7 +70,6 @@ struct digital_output_s {
 
 /* === Public function implementation ========================================================== */
 
-//! Casi equivalente a Chip_SCU_PinMuxSet
 digital_output_t DigitalOutputCreate(uint8_t port, uint8_t pin){
     digital_output_t output = NULL;
     static struct digital_output_s instancias[NUMBER_OF_OUTPUTS] = {0};
@@ -78,19 +87,64 @@ digital_output_t DigitalOutputCreate(uint8_t port, uint8_t pin){
     }
     return output;
 }
-;
-//! Casi equivalente a Chip_GPIO_SetPinState
+
+digital_input_t DigitalInputCreate(uint8_t port, uint8_t pin, bool inverted){
+    digital_input_t input = NULL;
+    static struct digital_input_s instancias[NUMBER_OF_INPUTS] = {0};
+    for (int i = 0 ; i < NUMBER_OF_INPUTS; i++){
+        if(!instancias[i].ocupado){
+            instancias[i].ocupado=true;
+            input = &instancias[i];
+            input->ocupado = true;
+            input->inverted = inverted;
+            input->port = port;
+            input->pin = pin;
+            Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, input->port, input->pin, false);
+            break;
+        }
+    }
+    return input;
+}
+
+//                  ENTRADAS
+
+bool DigitalInputGetState (digital_input_t input){
+    return ( input->inverted ^ Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, input->port, input->pin) );
+}
+
+// void DigitalInputHasChanged(digital_input_t input){
+//     bool current_state = DigitalInputPressed(input);
+//     bool state = ( current_state != input->last_state );
+//     input->last_state = current_state;
+//     return state;
+// }
+
+
+bool DigitalInputHasActivated(digital_input_t input){
+    bool current_state = DigitalInputPressed(input);
+    bool state = ( current_state &&  !input->last_state );
+    input->last_state = current_state;
+    return state;
+}
+
+
+// void DigitalInputHasDeactivated(digital_input_t input){
+//     bool current_state = DigitalInputPressed(input);
+//     bool state = ( !current_state &&  !input->last_state );
+//     input->last_state = current_state;
+//     return state;
+// }
+
+//                  SALIDAS
+
 void DigitalOutputActivate (digital_output_t output){
     Chip_GPIO_SetPinState(LPC_GPIO_PORT, output->port, output->pin, true);
 }
 
-//! Casi equivalente a Chip_GPIO_SetPinState
 void DigitalOutputDeactivate (digital_output_t output){
-    // eslint-disable-next-line
     Chip_GPIO_SetPinState(LPC_GPIO_PORT, output->port, output->pin, false);
 }
 
-//! Casi equivalente a Chip_GPIO_SetPinState
 void DigitalOutputToggle (digital_output_t output){
     Chip_GPIO_SetPinToggle(LPC_GPIO_PORT, output->port, output->pin);
 }
