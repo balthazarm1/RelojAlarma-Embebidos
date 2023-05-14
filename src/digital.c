@@ -21,7 +21,7 @@ SPDX-License-Identifier: MIT
 
 /**
  ** \author Balthazar Martin
- ** \date ??/04/23
+ ** \date 15/05/23
  ** \brief Implementacion del modulo digital
  **
  ** \addtogroup Digital Digital.c
@@ -30,12 +30,12 @@ SPDX-License-Identifier: MIT
 
 /* === Headers files inclusions =============================================================== */
 
-#include "digital.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 #include "chip.h"
+#include "digital.h"
 
 /* === Macros definitions ====================================================================== */
 
@@ -121,7 +121,7 @@ bool DigitalInputGetState (digital_input_t input){
 
 
 bool DigitalInputHasActivated(digital_input_t input){
-    bool current_state = DigitalInputPressed(input);
+    bool current_state = DigitalInputGetState(input);
     bool state = ( current_state &&  !input->last_state );
     input->last_state = current_state;
     return state;

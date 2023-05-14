@@ -24,7 +24,7 @@ SPDX-License-Identifier: MIT
 
 /**
  ** \author Balthazar Martin
- ** \date ??/04/23
+ ** \date 15/05/23
  ** \brief Declaraciones publicas del modulo digital
  **
  ** \addtogroup digital digital.h
@@ -51,7 +51,7 @@ extern "C" {
      * Este parametro define el numero de salidas en caso que no se haya definido antes una
      * cantidad especifica \ref digital_output_s "digital_output_s"
      */
-    #define NUMBER_OF_OUTPUTS 4
+    #define NUMBER_OF_OUTPUTS 6
 #endif
 
 #ifndef NUMBER_OF_INPUTS
@@ -92,7 +92,7 @@ digital_output_t DigitalOutputCreate(uint8_t port, //!<  Numero de Puerto GPIO a
  * @return true La entrada esta activa
  * @return false La entrada esta inactiva
  */
-bool DigitalInputGetState (digital_input_t input /*!< */ );
+bool DigitalInputGetState (digital_input_t input);
 
 /** 
  * @brief Funcion que chequea si la entrada fue activada
@@ -101,20 +101,20 @@ bool DigitalInputGetState (digital_input_t input /*!< */ );
  * @return true La entrada esta activada
  * @return false La entrada no esta activada
  */
-bool DigitalInputHasActivated(digital_input_t input /*!< */ );
+bool DigitalInputHasActivated(digital_input_t input);
 
 // void DigitalInputHasDeactivated(digital_input_t input);
 
 // void DigitalInputHasChanged(digital_input_t input);
 
 //! Funcion que activa la Salida Digital
-void DigitalOutputActivate (digital_output_t output /*!< */ );
+void DigitalOutputActivate (digital_output_t output);
 
 //! Funcion que desactiva la Salida Digital
-void DigitalOutputDeactivate (digital_output_t output /*!< */ );
+void DigitalOutputDeactivate (digital_output_t output);
 
 //! Funcion que conmuta la Salida Digital
-void DigitalOutputToggle (digital_output_t output /*!< */ );
+void DigitalOutputToggle (digital_output_t output);
     
 /* === End of documentation ==================================================================== */
 
@@ -124,4 +124,4 @@ void DigitalOutputToggle (digital_output_t output /*!< */ );
 
 /** @} End of module definition for doxygen */
 
-#endif /* ALUMNO_H */
+#endif /* DIGITAL_H */
