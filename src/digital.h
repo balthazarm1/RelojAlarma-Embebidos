@@ -41,27 +41,28 @@ extern "C" {
 
 /* === Public macros definitions =============================================================== */
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
+
 
 #ifndef NUMBER_OF_OUTPUTS
-    /**
-     * @brief Define el numero de salidas 
-     *
-     * Este parametro define el numero de salidas en caso que no se haya definido antes una
-     * cantidad especifica \ref digital_output_s "digital_output_s"
-     */
-    #define NUMBER_OF_OUTPUTS 6
+/**
+ * @brief Define el numero de salidas
+ *
+ * Este parametro define el numero de salidas en caso que no se haya definido antes una
+ * cantidad especifica \ref digital_output_s "digital_output_s"
+ */
+#define NUMBER_OF_OUTPUTS 6
 #endif
 
 #ifndef NUMBER_OF_INPUTS
-    /**
-     * @brief Define el numero de entradas 
-     *
-     * Este parametro define el numero de entradas en caso que no se haya definido antes una
-     * cantidad especifica \ref digital_input_s "digital_input_s"
-     */
-    #define NUMBER_OF_INPUTS 4
+/**
+ * @brief Define el numero de entradas
+ *
+ * Este parametro define el numero de entradas en caso que no se haya definido antes una
+ * cantidad especifica \ref digital_input_s "digital_input_s"
+ */
+#define NUMBER_OF_INPUTS 4
 #endif
 /* === Public data type declarations =========================================================== */
 
@@ -77,26 +78,25 @@ typedef struct digital_input_s * digital_input_t;
 
 //! Funcion para recibir datos de las Entradas Digitales y crearlas de forma Estatica
 digital_input_t DigitalInputCreate(uint8_t port, //!< Numero de Puerto GPIO al que esta conectada la Entrada Digital
-                                    uint8_t pin, //!< Numero de Pin GPIO al que esta conectada la Entrada Digital
-                                    bool inverted /*!< Boolenao que indica si la entrada sera pullup o pulldown */);
-
+                                   uint8_t pin,  //!< Numero de Pin GPIO al que esta conectada la Entrada Digital
+                                   bool inverted /*!< Boolenao que indica si la entrada sera pullup o pulldown */);
 
 //! Funcion para recibir datos de las Salidas Digitales y crearlas de forma Estatica
 digital_output_t DigitalOutputCreate(uint8_t port, //!<  Numero de Puerto GPIO al que esta conectada la Salida Digital
                                      uint8_t pin /*!< Numero de Pin GPIO al que esta conectada la Salida Digital */);
 
-/** 
+/**
  * @brief Funcion que chequea si la entrada esta activa o inactiva
- * 
+ *
  * @param input Puntero a la estructura de las Entradas Digitales
  * @return true La entrada esta activa
  * @return false La entrada esta inactiva
  */
-bool DigitalInputGetState (digital_input_t input);
+bool DigitalInputGetState(digital_input_t input);
 
-/** 
+/**
  * @brief Funcion que chequea si la entrada fue activada
- * 
+ *
  * @param input Puntero a la estructura de las Entradas Digitales
  * @return true La entrada esta activada
  * @return false La entrada no esta activada
@@ -108,14 +108,14 @@ bool DigitalInputHasActivated(digital_input_t input);
 // void DigitalInputHasChanged(digital_input_t input);
 
 //! Funcion que activa la Salida Digital
-void DigitalOutputActivate (digital_output_t output);
+void DigitalOutputActivate(digital_output_t output);
 
 //! Funcion que desactiva la Salida Digital
-void DigitalOutputDeactivate (digital_output_t output);
+void DigitalOutputDeactivate(digital_output_t output);
 
 //! Funcion que conmuta la Salida Digital
-void DigitalOutputToggle (digital_output_t output);
-    
+void DigitalOutputToggle(digital_output_t output);
+
 /* === End of documentation ==================================================================== */
 
 #ifdef __cplusplus

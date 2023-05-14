@@ -45,7 +45,7 @@ extern "C" {
 /* === Public data type declarations =========================================================== */
 
 //! Estructura publica para definir las Entradas y Salidas de una placa
-typedef struct  board_s {
+typedef struct board_s {
     digital_output_t ledrgb_azul;
     digital_output_t ledrgb_verde;
     digital_output_t ledrgb_rojo;
@@ -58,7 +58,6 @@ typedef struct  board_s {
     digital_input_t TEC_3;
     digital_input_t TEC_4;
 } const * const board_t;
-
 
 /* === Public variable definitions ============================================================= */
 

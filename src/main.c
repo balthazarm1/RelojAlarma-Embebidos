@@ -30,9 +30,9 @@ SPDX-License-Identifier: MIT
 
 /* === Headers files inclusions =============================================================== */
 
+#include "bsp.h"
 #include "chip.h"
 #include "digital.h"
-#include "bsp.h"
 #include <stdbool.h>
 
 /* === Macros definitions ====================================================================== */
@@ -54,39 +54,30 @@ SPDX-License-Identifier: MIT
 int main(void) {
 
     int divisor = 0;
-    //bool current_state, last_state = false;
 
     board_t board = BoardCreate();
 
     while (true) {
-        if (DigitalInputGetState(board->TEC_1)/*Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, TEC_1_GPIO, TEC_1_BIT  == 0 */) {
-            //Chip_GPIO_SetPinState(LPC_GPIO_PORT, LED_B_GPIO, LED_B_BIT, true);
+        if (DigitalInputGetState(board->TEC_1)) {
             DigitalOutputActivate(board->ledrgb_azul);
         } else {
-            //Chip_GPIO_SetPinState(LPC_GPIO_PORT, LED_B_GPIO, LED_B_BIT, false);
             DigitalOutputDeactivate(board->ledrgb_azul);
         }
 
-        //current_state = (DigitalInputGetState(TEC_2) /*Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, TEC_2_GPIO, TEC_2_BIT) == 0*/);
-        if ( DigitalInputHasActivated(board->TEC_2) /*(current_state) && ( !last_state crear funcion?  )*/ ) {
-            //Chip_GPIO_SetPinToggle(LPC_GPIO_PORT, LED_1_GPIO, LED_1_BIT);
+        if (DigitalInputHasActivated(board->TEC_2)) {
             DigitalOutputToggle(board->led_rojo);
         }
-        //last_state = current_state;
 
-        if (DigitalInputGetState(board->TEC_3)/*Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, TEC_3_GPIO, TEC_3_BIT) == 0*/) {
-            //Chip_GPIO_SetPinState(LPC_GPIO_PORT, LED_2_GPIO, LED_2_BIT, true);
+        if (DigitalInputGetState(board->TEC_3)) {
             DigitalOutputActivate(board->led_amarillo);
         }
-        if (DigitalInputGetState(board->TEC_4)/*Chip_GPIO_ReadPortBit(LPC_GPIO_PORT, TEC_4_GPIO, TEC_4_BIT) == 0*/) {
-            //Chip_GPIO_SetPinState(LPC_GPIO_PORT, LED_2_GPIO, LED_2_BIT, false);
+        if (DigitalInputGetState(board->TEC_4)) {
             DigitalOutputDeactivate(board->led_amarillo);
         }
 
         divisor++;
         if (divisor == 5) {
             divisor = 0;
-            //Chip_GPIO_SetPinToggle(LPC_GPIO_PORT, LED_3_GPIO, LED_3_BIT);
             DigitalOutputToggle(board->led_verde);
         }
 

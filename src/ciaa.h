@@ -42,7 +42,7 @@ extern "C" {
 
 /* === Public macros definitions =============================================================== */
 
-//https://www.proyecto-ciaa.com.ar/devwiki/lib/exe/fetch.php?media=desarrollo:edu-ciaa:edu-ciaa-nxp_pinout_a4_v4r2_es.pdf
+// https://www.proyecto-ciaa.com.ar/devwiki/lib/exe/fetch.php?media=desarrollo:edu-ciaa:edu-ciaa-nxp_pinout_a4_v4r2_es.pdf
 
 #define LED_R_PORT 2
 #define LED_R_PIN 0
