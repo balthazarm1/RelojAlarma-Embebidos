@@ -52,7 +52,7 @@ extern "C" {
  * Este parametro define el numero de salidas en caso que no se haya definido antes una
  * cantidad especifica \ref digital_output_s "digital_output_s"
  */
-#define NUMBER_OF_OUTPUTS 6
+#define NUMBER_OF_OUTPUTS 1
 #endif
 
 #ifndef NUMBER_OF_INPUTS
@@ -62,7 +62,7 @@ extern "C" {
  * Este parametro define el numero de entradas en caso que no se haya definido antes una
  * cantidad especifica \ref digital_input_s "digital_input_s"
  */
-#define NUMBER_OF_INPUTS 4
+#define NUMBER_OF_INPUTS 6
 #endif
 /* === Public data type declarations =========================================================== */
 

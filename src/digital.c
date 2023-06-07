@@ -21,7 +21,7 @@ SPDX-License-Identifier: MIT
 
 /**
  ** \author Balthazar Martin
- ** \date 15/05/23
+ ** \date 05/06/23
  ** \brief Implementacion del modulo digital
  **
  ** \addtogroup Digital Digital.c

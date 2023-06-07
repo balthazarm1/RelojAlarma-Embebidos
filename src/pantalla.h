@@ -18,19 +18,21 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 SPDX-License-Identifier: MIT
 *************************************************************************************************/
-#ifndef BSP_H
-#define BSP_H
+#ifndef PANTALLA_H
+#define PANTALLA_H
 
 /**
  ** \author Balthazar Martin
  ** \date 05/06/23
- ** \brief Declaraciones publicas del modulo bsp
+ ** \brief Declaraciones publicas del controlador de la pantalla
  **
- ** \addtogroup bsp bsp.h
- ** \brief Declaraciones publicas para implementar Entradas y Salidas Digitales
+ ** \addtogroup pantalla pantalla.h
+ ** \brief Declaraciones publicas para crear HAL del controlador de la pantalla de 7 segmentos
  ** @{ */
 
 /* === Headers files inclusions =============================================================== */
+
+#include "poncho.h"
 
 /* === Cabecera C++ ============================================================================ */
 
@@ -40,29 +42,43 @@ extern "C" {
 
 /* === Public macros definitions =============================================================== */
 
-#include "digital.h"
-#include "pantalla.h"
-
 /* === Public data type declarations =========================================================== */
 
-//! Estructura publica para definir las Entradas y Salidas con las que trabajara nuestra placa
-typedef struct board_s {
-    digital_output_t buzzer;
-    digital_input_t set_hora;
-    digital_input_t set_alarma;
-    digital_input_t incrementar;
-    digital_input_t decrementar;
-    digital_input_t aceptar;
-    digital_input_t cancelar;
-    display_t display;
-} const * const board_t;
+//! Estructura anonima con un puntero para almacenar datos del display con campos desconocidos
+typedef struct display_s * display_t;
+
+//! F.Callback del controlador de la pantalla para apagar a la misma
+typedef void (*display_screen_off_t)(void);
+
+//! F.Callback del controlador de la pantalla para encender los segmentos de la misma
+typedef void (*display_segments_on_t)(uint8_t segments);
+
+//! F.Callback del controlador de la pantalla para encender los digitos de la misma
+typedef void (*display_digits_on_t)(uint8_t digits);
+
+//! Estructura que solo almacena las funciones del controlador del display
+typedef struct display_driver_s {
+    display_screen_off_t DisplayTurnOff;
+    display_segments_on_t SegmentsTurnOn;
+    display_digits_on_t DigitsTurnOn;
+} const * const display_driver_t;
 
 /* === Public variable definitions ============================================================= */
 
 /* === Public function declarations ============================================================ */
 
-//! Funcion que implementara las Entradas y Salidas de la placa
-board_t BoardCreate(void);
+//! Funcion que recibe los campos del display para crear y devolver un puntero a la misma
+display_t DisplayCreate(uint8_t digits, //!< Entero que indicara cuantos digitos dispondra el display al crearlo
+                        display_driver_t driver /*!< Puntero a su controlador donde se le asignara las funciones*/);
+
+//! Funcion que permira la conversion de decimal a binario para mostrar en el display los numeros que se soliciten
+void DisplayWriteBCD(display_t display, //!< Puntero a la estructura del display
+                     uint8_t * number,  //!< Entero que se expresara como un arreglo que indicara que numeros se desean
+                                        //!< mostrar en cada digito del display
+                     uint8_t size /*!< Entero que indica cuantos digitos se mostraran en el display*/);
+
+//! Funcion que permitira refrescar el display
+void DisplayRefresh(display_t display /*!< Puntero a la estructura del display*/);
 
 /* === End of documentation ==================================================================== */
 
@@ -72,4 +88,4 @@ board_t BoardCreate(void);
 
 /** @} End of module definition for doxygen */
 
-#endif /* BSP_H */
+#endif /* PANTALLA_H */

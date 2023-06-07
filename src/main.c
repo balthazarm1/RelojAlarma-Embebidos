@@ -22,10 +22,10 @@ SPDX-License-Identifier: MIT
 /**
  ** \author Balthazar Martin
  ** \date 15/05/23
- ** \brief Implimentacion publica para testear Entradas y Salidas Digitales
+ ** \brief Implimentacion publica para testear Entradas y Salidas Digitales <--     CAMBIAR 
  **
- ** \addtogroup tp4 TP4-main.c
- ** \brief Cuarto Trabajo Practico
+ ** \addtogroup tp6 TP4-main.c
+ ** \brief Sexto Trabajo Practico
  ** @{ */
 
 /* === Headers files inclusions =============================================================== */
@@ -33,7 +33,9 @@ SPDX-License-Identifier: MIT
 #include "bsp.h"
 #include "chip.h"
 #include "digital.h"
+#include "pantalla.h"
 #include <stdbool.h>
+#include <stdlib.h>
 
 /* === Macros definitions ====================================================================== */
 
@@ -53,36 +55,37 @@ SPDX-License-Identifier: MIT
 
 int main(void) {
 
-    int divisor = 0;
-
     board_t board = BoardCreate();
 
     while (true) {
-        if (DigitalInputGetState(board->TEC_1)) {
-            DigitalOutputActivate(board->ledrgb_azul);
-        } else {
-            DigitalOutputDeactivate(board->ledrgb_azul);
+        
+        if (DigitalInputHasActivated(board->aceptar)) {
+            DisplayWriteBCD(board->display, (uint8_t[]){5, 6, 7, 8}, 4);
         }
 
-        if (DigitalInputHasActivated(board->TEC_2)) {
-            DigitalOutputToggle(board->led_rojo);
+        if (DigitalInputHasActivated(board->cancelar)) {
+            DisplayWriteBCD(board->display, NULL, 0);
         }
 
-        if (DigitalInputGetState(board->TEC_3)) {
-            DigitalOutputActivate(board->led_amarillo);
-        }
-        if (DigitalInputGetState(board->TEC_4)) {
-            DigitalOutputDeactivate(board->led_amarillo);
-        }
+        // if (DigitalInputHasActivated(board->set_alarma)) {
+            
+        // }
 
-        divisor++;
-        if (divisor == 5) {
-            divisor = 0;
-            DigitalOutputToggle(board->led_verde);
-        }
+        // if (DigitalInputHasActivated(board->set_hora)) {
+            
+        // }
+
+        // if (DigitalInputHasActivated(board->incrementar)) {
+            
+        // }
+        // if (DigitalInputHasActivated(board->decrementar)) {
+            
+        // }
+
+        DisplayRefresh(board->display);
 
         for (int index = 0; index < 100; index++) {
-            for (int delay = 0; delay < 25000; delay++) {
+            for (int delay = 0; delay < 250; delay++) {
                 __asm("NOP");
             }
         }
