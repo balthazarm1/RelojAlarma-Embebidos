@@ -80,6 +80,16 @@ void DisplayWriteBCD(display_t display, //!< Puntero a la estructura del display
 //! Funcion que permitira refrescar el display
 void DisplayRefresh(display_t display /*!< Puntero a la estructura del display*/);
 
+//! Completar
+void DisplayFlashDigits(display_t display, //!< Puntero a la estructura del display
+                        uint8_t from, //!< Posicion del primer digito que se desea parpadear
+                        uint8_t to, //!< Posicion del ultimo digito que se desea parpadear
+                        uint16_t frequency /*!< Factor de division de frequencia de parpadeo*/);
+
+//!
+void DisplayToggleDot(display_t display, //!< Puntero a la estructura del display 
+                      uint8_t position /*!< Posicion del punto que se desea parpadear*/);
+
 /* === End of documentation ==================================================================== */
 
 #ifdef __cplusplus

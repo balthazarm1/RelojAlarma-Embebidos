@@ -65,6 +65,10 @@ SPDX-License-Identifier: MIT
 struct display_s {
     uint8_t digits;                       //! Entero que representa cuantos digitos tendra el display al crearlo
     uint8_t digits_active;                //! Entero que representa cuantos digitos estara activos en el display
+    uint8_t flashing_from;                //! Entero que guarda cual sera el primer digito que se desea parpadear
+    uint8_t flashing_to;                  //! Entero que guarda cual sera el ultimo digito que se desea parpadear
+    uint16_t flashing_count;              //! Entero que guarda cuanto tiempo se lleva parpadeando
+    uint16_t flashing_factor;             //! Entero que guarda cuantos ciclos se debera hacer el parpadeo
     uint8_t memory[DISPLAY_MAX_SEGMENTS]; //! Entero que almacenara los numeros que se querran mostrar en el display
     struct display_driver_s driver[1];    //! Estructura que solo almacena las funciones de callback del display
 };
@@ -109,6 +113,10 @@ display_t DisplayCreate(uint8_t digits, display_driver_t driver) {
     if (display) {
         display->digits = digits;
         display->digits_active = digits - 1;
+        display->flashing_from = 0;
+        display->flashing_to = 0;
+        display->flashing_count = 0;
+        display->flashing_factor = 0;
         memcpy(display->driver, driver, sizeof(display->driver));
         memset(display->memory, 0, sizeof(display->memory));
         display->driver->DisplayTurnOff();
@@ -118,17 +126,43 @@ display_t DisplayCreate(uint8_t digits, display_driver_t driver) {
 }
 
 void DisplayWriteBCD(display_t display, uint8_t * number, uint8_t size) {
-    memset(display->memory, 0, sizeof(display->memory));
+    memset(display->memory, 0, sizeof(display->memory));   //creo que no debo tocar nada aqui
     for (int index = 0; (index < size && index < display->digits); index++) {
         display->memory[index] = IMAGES[number[index]];
     }
 }
 
 void DisplayRefresh(display_t display) {
+    uint8_t segments;
+
     display->driver->DisplayTurnOff();
     display->digits_active = (display->digits_active + 1) % display->digits;
-    display->driver->SegmentsTurnOn(display->memory[display->digits_active]);
+
+    segments = display->memory[display->digits_active];
+    if (display->flashing_factor) {
+        if (display->digits_active == 0){   //si comienza un nuevo barrido
+            display->flashing_count = (display->flashing_count + 1) % display->flashing_factor;
+        }
+        if ((display->digits_active >= display->flashing_from) && (display->digits_active <= display->flashing_to)){
+            if(display->flashing_count > (display->flashing_factor / 2)){
+                segments = 0;
+            }
+        }
+    }
+
+    display->driver->SegmentsTurnOn(segments);
     display->driver->DigitsTurnOn(display->digits_active);
+}
+
+void    DisplayFlashDigits(display_t display, uint8_t from, uint8_t to, uint16_t frequency){
+    display->flashing_count = 0;
+    display->flashing_factor = frequency;
+    display->flashing_from = from;
+    display->flashing_to = to;
+}
+
+void DisplayToggleDot(display_t display, uint8_t position){
+    display->memory[position] ^= (1 << 7); 
 }
 
 /* === End of documentation ==================================================================== */

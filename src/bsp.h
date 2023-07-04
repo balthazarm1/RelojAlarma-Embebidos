@@ -55,7 +55,7 @@ typedef struct board_s {
     digital_input_t aceptar;
     digital_input_t cancelar;
     display_t display;
-} const * const board_t;
+} const * board_t;
 
 /* === Public variable definitions ============================================================= */
 
@@ -63,6 +63,8 @@ typedef struct board_s {
 
 //! Funcion que implementara las Entradas y Salidas de la placa
 board_t BoardCreate(void);
+
+void SysTick_Init(uint16_t ticks);
 
 /* === End of documentation ==================================================================== */
 
