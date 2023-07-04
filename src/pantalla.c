@@ -126,9 +126,11 @@ display_t DisplayCreate(uint8_t digits, display_driver_t driver) {
 }
 
 void DisplayWriteBCD(display_t display, uint8_t * number, uint8_t size) {
-    memset(display->memory, 0, sizeof(display->memory));   //creo que no debo tocar nada aqui
-    for (int index = 0; (index < size && index < display->digits); index++) {
-        display->memory[index] = IMAGES[number[index]];
+    for (int index = 0; index < size; index++) {
+        if (index >= display->digits)
+            break;
+        display->memory[index] &= SEGMENT_P;
+        display->memory[index] |= IMAGES[number[index]];
     }
 }
 
@@ -161,8 +163,21 @@ void    DisplayFlashDigits(display_t display, uint8_t from, uint8_t to, uint16_t
     display->flashing_to = to;
 }
 
-void DisplayToggleDot(display_t display, uint8_t position){
-    display->memory[position] ^= (1 << 7); 
+bool DisplayToggleDot(display_t display, uint8_t position){
+    display->memory[position] ^= SEGMENT_P; 
+    return (display->memory[position] & SEGMENT_P);
+}
+
+void DisplayTurnOnDot(display_t display, uint8_t position) {
+    if (!DisplayToggleDot(display, position)) {
+        DisplayToggleDot(display, position);
+    }
+}
+
+void DisplayTurnOffDot(display_t display, uint8_t position) {
+    if (DisplayToggleDot(display, position)) {
+        DisplayToggleDot(display, position);
+    }
 }
 
 /* === End of documentation ==================================================================== */

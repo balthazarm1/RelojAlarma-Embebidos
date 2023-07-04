@@ -147,7 +147,7 @@ void CheckAlarmActive(clock_t reloj);
  ** @param reloj Puntero al reloj que fue creado
  ** @return Devuelve el tick al que esta actualmente
  **/
-void ClockTick(clock_t reloj);
+int ClockTick(clock_t reloj);
 
 /* === End of documentation ==================================================================== */
 

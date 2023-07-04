@@ -82,7 +82,7 @@ void DisplayTurnOff(void) {
 
 void SegmentsTurnOn(uint8_t segments) {
     Chip_GPIO_SetValue(LPC_GPIO_PORT, SEGMENTS_GPIO, (segments & SEGMENTS_MASK));
-    Chip_GPIO_SetPinState(LPC_GPIO_PORT, SEGMENT_P_GPIO, SEGMENT_P_BIT, (segments & (1 << 7)));
+    Chip_GPIO_SetPinState(LPC_GPIO_PORT, SEGMENT_P_GPIO, SEGMENT_P_BIT, (segments & SEGMENT_P));
 }
 
 void DigitsTurnOn(uint8_t digits) {

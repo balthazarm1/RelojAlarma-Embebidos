@@ -169,7 +169,7 @@ void ClockPostponeAlarm(clock_t reloj, uint8_t tiempo) {
     memcpy(reloj->alarma_actual, time, sizeof(time));
 }
 
-void ClockTick(clock_t reloj) {
+int ClockTick(clock_t reloj) {
     reloj->ticks++;
 
     if (reloj->ticks == reloj->tics_por_segundo) { // segundos unidad
@@ -202,11 +202,7 @@ void ClockTick(clock_t reloj) {
         reloj->hora_actual[1] = 0;
     }
 
-    // if (reloj->ticks == reloj->tics_por_segundo / 2) { // medio segundo 
-    //     return true;    //capaz me falta agregar un and para 1 segundo
-    // }else{
-    //     return false;
-    // }
+    return reloj->ticks;
 }
 
 /* === End of documentation ==================================================================== */

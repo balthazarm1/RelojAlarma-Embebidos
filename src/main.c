@@ -37,6 +37,10 @@ SPDX-License-Identifier: MIT
 
 /* === Macros definitions ====================================================================== */
 
+#ifndef TICKS_PER_SEC
+#define TICKS_PER_SEC 1000
+#endif
+
 /* === Private data type declarations ========================================================== */
 
 typedef enum {
@@ -86,6 +90,10 @@ void CambiarModo(modo_t valor){
     switch (modo) {
     case SIN_CONFIGURAR:
         DisplayFlashDigits(board->display, 0, 3, 200);
+        DisplayTurnOnDot(board->display, 1);
+        // DisplayTurnOffDot(board->display, 0);
+        // DisplayTurnOffDot(board->display, 2);
+        // DisplayTurnOffDot(board->display, 3);
         break;
     case MOSTRANDO_HORA:
         DisplayFlashDigits(board->display, 0, 0, 0);
@@ -98,17 +106,17 @@ void CambiarModo(modo_t valor){
         break;
     case AJUSTANDO_MINUTOS_ALARMA:
         DisplayFlashDigits(board->display, 2, 3, 200);
-        DisplayToggleDot(board->display, 0);
-        DisplayToggleDot(board->display, 1);
-        DisplayToggleDot(board->display, 2);
-        DisplayToggleDot(board->display, 3);
+        // DisplayToggleDot(board->display, 0);
+        // DisplayToggleDot(board->display, 1);
+        // DisplayToggleDot(board->display, 2);
+        // DisplayToggleDot(board->display, 3);
         break;
     case AJUSTANDO_HORAS_ALARMA:
         DisplayFlashDigits(board->display, 0, 1, 200);
-        DisplayToggleDot(board->display, 0);
-        DisplayToggleDot(board->display, 1);
-        DisplayToggleDot(board->display, 2);
-        DisplayToggleDot(board->display, 3);
+        // DisplayToggleDot(board->display, 0);
+        // DisplayToggleDot(board->display, 1);
+        // DisplayToggleDot(board->display, 2);
+        // DisplayToggleDot(board->display, 3);
         break;
     default:
         break;
@@ -144,10 +152,10 @@ void DecrementarBCD(uint8_t numero[2], const uint8_t limite[2]) {
 int main(void) {
     uint8_t hora_entrada[4];
                         //recordar dejorlo en 1000
-    reloj = ClockCreate(1000, ActivarAlarma); //ver esta funcion activar alarma con los test
+    reloj = ClockCreate(TICKS_PER_SEC, ActivarAlarma); //ver esta funcion activar alarma con los test
     board = BoardCreate();
 
-    SysTick_Init(1000);
+    SysTick_Init(TICKS_PER_SEC);
     CambiarModo(SIN_CONFIGURAR);
 
     while (true) {        
@@ -187,10 +195,10 @@ int main(void) {
             CambiarModo(AJUSTANDO_MINUTOS_ALARMA);
             ClockGetAlarm(reloj, hora_entrada, sizeof(hora_entrada));
             DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada));
-            DisplayToggleDot(board->display, 0);
-            DisplayToggleDot(board->display, 1);
-            DisplayToggleDot(board->display, 2);
-            DisplayToggleDot(board->display, 3);
+            // DisplayToggleDot(board->display, 0);
+            // DisplayToggleDot(board->display, 1);
+            // DisplayToggleDot(board->display, 2);
+            // DisplayToggleDot(board->display, 3);
         }
 
         if (DigitalInputHasActivated(board->set_hora)) {
@@ -210,10 +218,10 @@ int main(void) {
                 DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada)); 
             } else if ( (modo == AJUSTANDO_HORAS_ALARMA) || (modo == AJUSTANDO_MINUTOS_ALARMA)){
                 DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada));
-                DisplayToggleDot(board->display, 0);
-                DisplayToggleDot(board->display, 1);
-                DisplayToggleDot(board->display, 2);
-                DisplayToggleDot(board->display, 3);
+                // DisplayToggleDot(board->display, 0);
+                // DisplayToggleDot(board->display, 1);
+                // DisplayToggleDot(board->display, 2);
+                // DisplayToggleDot(board->display, 3);
             }
         }
 
@@ -228,16 +236,16 @@ int main(void) {
                 DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada)); 
             } else if ( (modo == AJUSTANDO_HORAS_ALARMA) || (modo == AJUSTANDO_MINUTOS_ALARMA)){
                 DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada));
-                DisplayToggleDot(board->display, 0);
-                DisplayToggleDot(board->display, 1);
-                DisplayToggleDot(board->display, 2);
-                DisplayToggleDot(board->display, 3);
+                // DisplayToggleDot(board->display, 0);
+                // DisplayToggleDot(board->display, 1);
+                // DisplayToggleDot(board->display, 2);
+                // DisplayToggleDot(board->display, 3);
             }
         }
 
         //DisplayRefresh(board->display);
 
-        for (int index = 0; index < 100; index++) {
+        for (int index = 0; index < 20; index++) {
             for (int delay = 0; delay < 25000; delay++) {
                 __asm("NOP");
             }
@@ -251,25 +259,31 @@ int main(void) {
 }
 
 void SysTick_Handler(void) {
-    static uint16_t contador = 0;
-    uint8_t hora[4];
+    //static uint16_t contador = 0;
+    uint8_t hora[6];
+    int ticks;
 
     DisplayRefresh(board->display);
-    ClockTick(reloj);
+    ticks = ClockTick(reloj);
 
-    contador = (contador + 1) % 1000;
-    if ( modo <= MOSTRANDO_HORA){
-        ClockGetTime(reloj, hora, sizeof(hora));
-        DisplayWriteBCD(board->display, hora, sizeof(hora));
-        if ( contador > 500 ){
-            DisplayToggleDot(board->display, 1);
+    //contador = (contador + 1) % 1000;
+    if (ticks == TICKS_PER_SEC/2 || ticks == 0) {
+        if ( modo <= MOSTRANDO_HORA){
+            ClockGetTime(reloj, hora, sizeof(hora));
+            DisplayWriteBCD(board->display, hora, sizeof(hora));
+            if (modo == MOSTRANDO_HORA){
+                DisplayToggleDot(board->display, 1);
+            }
+            // if ( contador > 500 ){
+            //     DisplayToggleDot(board->display, 1);
+            // }
         }
-        if ( ClockGetAlarm(reloj, hora, sizeof(hora))){
-            DisplayToggleDot(board->display, 0);
-            DisplayToggleDot(board->display, 1);
-            DisplayToggleDot(board->display, 2);
-            DisplayToggleDot(board->display, 3);
-        }
+        // if ( ClockGetAlarm(reloj, hora, sizeof(hora))){
+        //     DisplayToggleDot(board->display, 0);
+        //     DisplayToggleDot(board->display, 1);
+        //     DisplayToggleDot(board->display, 2);
+        //     DisplayToggleDot(board->display, 3);
+        // }
     }
 }
 

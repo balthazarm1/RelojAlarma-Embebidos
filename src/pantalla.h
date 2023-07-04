@@ -42,6 +42,8 @@ extern "C" {
 
 /* === Public macros definitions =============================================================== */
 
+#define SEGMENT_P (1 << 7)
+
 /* === Public data type declarations =========================================================== */
 
 //! Estructura anonima con un puntero para almacenar datos del display con campos desconocidos
@@ -87,8 +89,12 @@ void DisplayFlashDigits(display_t display, //!< Puntero a la estructura del disp
                         uint16_t frequency /*!< Factor de division de frequencia de parpadeo*/);
 
 //!
-void DisplayToggleDot(display_t display, //!< Puntero a la estructura del display 
+bool DisplayToggleDot(display_t display, //!< Puntero a la estructura del display 
                       uint8_t position /*!< Posicion del punto que se desea parpadear*/);
+
+void DisplayTurnOnDot(display_t display, uint8_t position);
+
+void DisplayTurnOffDot(display_t display, uint8_t position);
 
 /* === End of documentation ==================================================================== */
 
