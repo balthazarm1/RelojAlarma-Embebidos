@@ -117,25 +117,25 @@ void CambiarModo(modo_t valor){
 
 void IncrementarBCD(uint8_t numero[2], const uint8_t limite[2]) {
     numero[1]++;
-    if (numero[1] > 9) {
-        numero[1] = 0;
-        numero[0]++;
-    }
     if ((numero[0] >= limite[0]) && numero[1] > limite[1]) {
         numero[1] = 0;
         numero[0] = 0;
+    }
+    if (numero[1] > 9) {
+        numero[1] = 0;
+        numero[0]++;
     }
 }
 
 void DecrementarBCD(uint8_t numero[2], const uint8_t limite[2]) {
     numero[1]--;
     if (numero[1] > 9) {
-        numero[1] = 0; //tenia 9
+        numero[1] = 9; 
         numero[0]--;
     }
-    if ((numero[0] > limite[0]) && numero[1] > limite[1]) { //tenia >=
-        numero[0] = 0; //tenia igual limite
-        numero[1] = 0; //tenia igual limite
+    if ((numero[0] >= limite[0]) && numero[1] >= limite[1]) { 
+        numero[0] = limite[0]; 
+        numero[1] = limite[1]; 
     }
 }
 
@@ -208,7 +208,7 @@ int main(void) {
 
             if( (modo == AJUSTANDO_MINUTOS_ACTUALES) || (modo == AJUSTANDO_HORAS_ACTUALES)){
                 DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada)); 
-            } else if ( (modo == AJUSTANDO_HORAS_ACTUALES) || (modo == AJUSTANDO_MINUTOS_ALARMA)){
+            } else if ( (modo == AJUSTANDO_HORAS_ALARMA) || (modo == AJUSTANDO_MINUTOS_ALARMA)){
                 DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada));
                 DisplayToggleDot(board->display, 0);
                 DisplayToggleDot(board->display, 1);
@@ -226,7 +226,7 @@ int main(void) {
 
             if( (modo == AJUSTANDO_MINUTOS_ACTUALES) || (modo == AJUSTANDO_HORAS_ACTUALES)){
                 DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada)); 
-            } else if ( (modo == AJUSTANDO_HORAS_ACTUALES) || (modo == AJUSTANDO_MINUTOS_ALARMA)){
+            } else if ( (modo == AJUSTANDO_HORAS_ALARMA) || (modo == AJUSTANDO_MINUTOS_ALARMA)){
                 DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada));
                 DisplayToggleDot(board->display, 0);
                 DisplayToggleDot(board->display, 1);
