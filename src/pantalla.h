@@ -92,9 +92,9 @@ void DisplayFlashDigits(display_t display, //!< Puntero a la estructura del disp
 bool DisplayToggleDot(display_t display, //!< Puntero a la estructura del display 
                       uint8_t position /*!< Posicion del punto que se desea parpadear*/);
 
-void DisplayTurnOnDot(display_t display, uint8_t position);
+void DisplayDeactivateDot(display_t display, uint8_t position);
 
-void DisplayTurnOffDot(display_t display, uint8_t position);
+void DisplayActivateDot(display_t display, uint8_t position);
 
 /* === End of documentation ==================================================================== */
 

@@ -103,17 +103,32 @@ void ClockSetAlarm(clock_t reloj, const uint8_t * hora, int size) {
 }
 
 void CheckAlarmActive(clock_t reloj) {
-    if (memcmp(reloj->alarma_actual, reloj->hora_actual, TIME_SIZE) == 0 && reloj->alarma_estado) {
-        reloj->handler(reloj);
+    if(reloj->alarma_estado){
+        if (memcmp(reloj->alarma_actual, reloj->hora_actual, TIME_SIZE) == 0) {
+            reloj->handler(reloj);
+        }
     }
 }
 
-void ClockAlarmToggle(clock_t reloj) {
-    reloj->alarma_estado = !reloj->alarma_estado;
+bool ClockAlarmToggle(clock_t reloj) {
+    return reloj->alarma_estado = !reloj->alarma_estado;
+}
+
+void ClockAlarmActivate(clock_t reloj) {
+    if (!ClockAlarmToggle(reloj)) {
+        ClockAlarmToggle(reloj);
+    }
+}
+
+void ClockAlarmDeactivate(clock_t reloj) {
+    if (ClockAlarmToggle(reloj)) {
+        ClockAlarmToggle(reloj);
+    }
 }
 
 void ClockStopAlarm(clock_t reloj) {
-    if (reloj->alarma_postergada && reloj->alarma_estado) {
+    ClockAlarmDeactivate(reloj);
+    if (reloj->alarma_postergada) {
         memcpy(reloj->alarma_actual, reloj->alarma_reservada, sizeof(reloj->alarma_reservada));
         reloj->alarma_postergada = false;
     }
@@ -164,6 +179,7 @@ void ClockPostponeAlarm(clock_t reloj, uint8_t tiempo) {
 
     memcpy(reloj->alarma_reservada, reloj->alarma_actual, TIME_SIZE);
     reloj->alarma_postergada = true;
+    ClockAlarmActivate(reloj);
     TraducirMinutos(tiempo, time_post);
     SumarHorarios(reloj->alarma_actual, time_post, time);
     memcpy(reloj->alarma_actual, time, sizeof(time));
@@ -201,6 +217,8 @@ int ClockTick(clock_t reloj) {
         reloj->hora_actual[0] = 0;
         reloj->hora_actual[1] = 0;
     }
+
+    
 
     return reloj->ticks;
 }

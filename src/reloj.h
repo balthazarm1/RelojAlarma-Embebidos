@@ -117,7 +117,11 @@ void ClockSetAlarm(clock_t reloj, const uint8_t * hora, int size);
  **
  ** @param reloj Puntero al reloj que fue creado
  **/
-void ClockAlarmToggle(clock_t reloj);
+bool ClockAlarmToggle(clock_t reloj);
+
+void ClockAlarmActivate(clock_t reloj);
+
+void ClockAlarmDeactivate(clock_t reloj);
 
 /**
  ** @brief Funcion para desactivar la alarma una vez que suene cuando fue pospuesta

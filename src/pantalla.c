@@ -168,13 +168,13 @@ bool DisplayToggleDot(display_t display, uint8_t position){
     return (display->memory[position] & SEGMENT_P);
 }
 
-void DisplayTurnOnDot(display_t display, uint8_t position) {
+void DisplayActivateDot(display_t display, uint8_t position) {
     if (!DisplayToggleDot(display, position)) {
         DisplayToggleDot(display, position);
     }
 }
 
-void DisplayTurnOffDot(display_t display, uint8_t position) {
+void DisplayDeactivateDot(display_t display, uint8_t position) {
     if (DisplayToggleDot(display, position)) {
         DisplayToggleDot(display, position);
     }
