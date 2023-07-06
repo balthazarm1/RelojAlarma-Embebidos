@@ -127,10 +127,11 @@ void ClockAlarmDeactivate(clock_t reloj) {
 }
 
 void ClockStopAlarm(clock_t reloj) {
-    ClockAlarmDeactivate(reloj);
     if (reloj->alarma_postergada) {
         memcpy(reloj->alarma_actual, reloj->alarma_reservada, sizeof(reloj->alarma_reservada));
         reloj->alarma_postergada = false;
+    }else{
+        ClockAlarmDeactivate(reloj);
     }
 }
 
@@ -174,15 +175,16 @@ void SumarHorarios(uint8_t alarma_actual[], uint8_t time_post[], uint8_t resulta
 }
 
 void ClockPostponeAlarm(clock_t reloj, uint8_t tiempo) {
-    uint8_t time_post[TIME_SIZE];
-    uint8_t time[TIME_SIZE];
+    //uint8_t time_post[TIME_SIZE];
+    //uint8_t time[TIME_SIZE];
 
     memcpy(reloj->alarma_reservada, reloj->alarma_actual, TIME_SIZE);
     reloj->alarma_postergada = true;
     ClockAlarmActivate(reloj);
-    TraducirMinutos(tiempo, time_post);
-    SumarHorarios(reloj->alarma_actual, time_post, time);
-    memcpy(reloj->alarma_actual, time, sizeof(time));
+    reloj->alarma_actual[3] += tiempo;
+    CONTROLAR_REBALSE_MIN(reloj->alarma_actual[2], reloj->alarma_actual[3],reloj->alarma_actual[1]);
+    CONTROLAR_REBALSE_HOR(reloj->alarma_actual[0], reloj->alarma_actual[1]);
+    //memcpy(reloj->alarma_actual, time, sizeof(time));
 }
 
 int ClockTick(clock_t reloj) {

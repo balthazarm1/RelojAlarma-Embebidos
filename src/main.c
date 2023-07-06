@@ -46,7 +46,7 @@ SPDX-License-Identifier: MIT
 #endif
 
 #ifndef TIEMPO_POSPONER
-#define TIEMPO_POSPONER 5
+#define TIEMPO_POSPONER 2
 #endif
 
 /* === Private data type declarations ========================================================== */
@@ -193,6 +193,9 @@ int main(void) {
                 }else if ( modo == AJUSTANDO_HORAS_ACTUALES){
                     ClockSetTime(reloj, hora_entrada, sizeof(hora_entrada));
                     CambiarModo(MOSTRANDO_HORA);
+                    if (ClockGetAlarm(reloj, hora_entrada, sizeof(hora_entrada))){
+                        DisplayActivateDot(board->display, 3);
+                    }
                 }else if ( modo == AJUSTANDO_MINUTOS_ALARMA){
                     CambiarModo(AJUSTANDO_HORAS_ALARMA);
                 }else if ( modo == AJUSTANDO_HORAS_ALARMA){
@@ -223,9 +226,10 @@ int main(void) {
                     }
                 }
             }else {
+                ClockStopAlarm(reloj);
                 DigitalOutputDeactivate(board->buzzer);
                 alarma_zumba = false;
-            }
+            };
         }
 
         if (DigitalInputHasActivated(board->set_alarma) && ClockGetTime(reloj, hora_entrada, sizeof(hora_entrada))) {
