@@ -46,7 +46,7 @@ SPDX-License-Identifier: MIT
 #endif
 
 #ifndef TIEMPO_POSPONER
-#define TIEMPO_POSPONER 2
+#define TIEMPO_POSPONER 5
 #endif
 
 /* === Private data type declarations ========================================================== */
@@ -85,6 +85,8 @@ static clock_t reloj;
 static modo_t modo;
 
 static bool alarma_zumba;
+
+static int contador_timeout = 0;
 
 /* === Private variable definitions ============================================================ */
 
@@ -169,12 +171,38 @@ void DecrementarBCD(uint8_t numero[2], const uint8_t limite[2]) {
     }
 }
 
+bool CountDown(int segundos, bool estado, int numero_entradas, const digital_input_t input[]) {
+    contador_timeout = segundos;
+    bool condicion = estado;
+
+    if (condicion) {
+        while (contador_timeout > 0 && condicion) {
+            for (int index = 0; index < numero_entradas; index++) {
+                condicion = DigitalInputGetState(input[index]);
+                if (!condicion) {
+                    return false;
+                }
+            }
+        }
+    } else {
+        while (contador_timeout > 0 && !condicion) {
+            for (int index = 0; index < numero_entradas; index++) {
+                condicion = DigitalInputGetState(input[index]);
+                if (condicion) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+
 /* === Public function implementation ========================================================= */
 
 int main(void) {
     uint8_t hora_entrada[4];
                         //recordar dejorlo en 1000
-    reloj = ClockCreate(100, ActivarAlarma); //ver esta funcion activar alarma con los test
+    reloj = ClockCreate(1000, ActivarAlarma); //ver esta funcion activar alarma con los test
     board = BoardCreate();
 
     SysTick_Init(TICKS_PER_SEC);
@@ -232,16 +260,16 @@ int main(void) {
             };
         }
 
-        if (DigitalInputHasActivated(board->set_alarma) && ClockGetTime(reloj, hora_entrada, sizeof(hora_entrada))) {
-            CambiarModo(AJUSTANDO_MINUTOS_ALARMA);
-            ClockGetAlarm(reloj, hora_entrada, sizeof(hora_entrada));
-            DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada));
-        }
-
-        if (DigitalInputHasActivated(board->set_hora)) {
+        if (CountDown(3, true, 1, &(board->set_hora)) ) {
             CambiarModo(AJUSTANDO_MINUTOS_ACTUALES);
             ClockGetTime(reloj, hora_entrada, sizeof(hora_entrada));
             DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada)); 
+        }
+
+        if (CountDown(3, true, 1, &(board->set_alarma)) && ClockGetTime(reloj, hora_entrada, sizeof(hora_entrada))){
+            CambiarModo(AJUSTANDO_MINUTOS_ALARMA);
+            ClockGetAlarm(reloj, hora_entrada, sizeof(hora_entrada));
+            DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada));
         }
 
         if (DigitalInputHasActivated(board->incrementar)) {
@@ -272,6 +300,18 @@ int main(void) {
             }
         }
 
+        if (CountDown(30, false, 6, (digital_input_t[]){board->aceptar, board->cancelar,
+                                                       board->set_hora, board->set_alarma,
+                                                       board->incrementar, board->decrementar})) {
+            if (modo > MOSTRANDO_HORA) {
+                if (ClockGetTime(reloj, hora_entrada, sizeof(hora_entrada))) {
+                    CambiarModo(MOSTRANDO_HORA);
+                } else {
+                    CambiarModo(SIN_CONFIGURAR);
+                }
+            }
+        }
+
         for (int index = 0; index < 20; index++) {
             for (int delay = 0; delay < 25000; delay++) {
                 __asm("NOP");
@@ -295,12 +335,9 @@ void SysTick_Handler(void) {
                 DisplayToggleDot(board->display, 1);
             }
         }
-        // if ( ClockGetAlarm(reloj, hora, sizeof(hora))){
-        //     DisplayToggleDot(board->display, 0);
-        //     DisplayToggleDot(board->display, 1);
-        //     DisplayToggleDot(board->display, 2);
-        //     DisplayToggleDot(board->display, 3);
-        // }
+        if ((ticks == 0) && contador_timeout) {
+            contador_timeout--;
+        }
     }
 }
 
