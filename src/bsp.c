@@ -34,6 +34,7 @@ SPDX-License-Identifier: MIT
 #include "chip.h"
 #include "digital.h"
 #include "pantalla.h"
+#include "ciaa.h"
 #include <stdbool.h>
 
 /* === Macros definitions ====================================================================== */
@@ -67,6 +68,9 @@ void BuzzerInit(void);
 
 //! Funcion que inicializa las teclas del poncho
 void KeysInit(void);
+
+//! Funcion que inicializa apagada a la placa EDU-CIAA
+void EDUCIAAInit(void);
 
 /* === Public variable definitions ============================================================= */
 
@@ -165,6 +169,18 @@ void KeysInit(void) {
     Chip_SCU_PinMuxSet(KEY_CANCEL_PORT, KEY_CANCEL_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_PULLUP | KEY_CANCEL_FUNC);
     board.cancelar = DigitalInputCreate(KEY_CANCEL_GPIO, KEY_CANCEL_BIT, false);
 }
+
+void EDUCIAAInit(void) {
+    Chip_SCU_PinMuxSet(LED_R_PORT, LED_R_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | LED_R_FUNC);
+    Chip_GPIO_SetPinState(LPC_GPIO_PORT, LED_R_GPIO, LED_R_BIT, false);
+    Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, LED_R_GPIO, LED_R_BIT, true);
+
+    Chip_SCU_PinMuxSet(LED_G_PORT, LED_G_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | LED_G_FUNC);
+    Chip_GPIO_SetPinState(LPC_GPIO_PORT, LED_G_GPIO, LED_G_BIT, false);
+    Chip_GPIO_SetPinDIR(LPC_GPIO_PORT, LED_G_GPIO, LED_G_BIT, true);
+
+}
+
 /* === Public function implementation ========================================================= */
 
 //! Funcion principal que inicializara los digitos, segmentos, buzzer, teclas e incorporara las funciones al driver del
@@ -174,6 +190,15 @@ board_t BoardCreate(void) {
     SegmentsInit();
     BuzzerInit();
     KeysInit();
+    EDUCIAAInit();
+
+    
+    Chip_SCU_PinMuxSet(LED_1_PORT, LED_1_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | LED_1_FUNC);
+    board.led_1 = DigitalOutputCreate(LED_1_GPIO, LED_1_BIT);
+    Chip_SCU_PinMuxSet(LED_2_PORT, LED_2_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | LED_2_FUNC);
+    board.led_2 = DigitalOutputCreate(LED_2_GPIO, LED_2_BIT);
+    Chip_SCU_PinMuxSet(LED_3_PORT, LED_3_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | LED_3_FUNC);
+    board.led_3 = DigitalOutputCreate(LED_3_GPIO, LED_3_BIT);
 
     board.display = DisplayCreate(4, &(struct display_driver_s){.DisplayTurnOff = DisplayTurnOff,
                                                                 .DigitsTurnOn = DigitsTurnOn,

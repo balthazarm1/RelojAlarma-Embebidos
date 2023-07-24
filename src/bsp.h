@@ -47,6 +47,9 @@ extern "C" {
 
 //! Estructura publica para definir las Entradas y Salidas con las que trabajara nuestra placa
 typedef struct board_s {
+    digital_output_t led_1;
+    digital_output_t led_2;
+    digital_output_t led_3;
     digital_output_t buzzer;
     digital_input_t set_hora;
     digital_input_t set_alarma;

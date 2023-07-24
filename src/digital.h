@@ -52,7 +52,7 @@ extern "C" {
  * Este parametro define el numero de salidas en caso que no se haya definido antes una
  * cantidad especifica \ref digital_output_s "digital_output_s"
  */
-#define NUMBER_OF_OUTPUTS 1
+#define NUMBER_OF_OUTPUTS 4
 #endif
 
 #ifndef NUMBER_OF_INPUTS
