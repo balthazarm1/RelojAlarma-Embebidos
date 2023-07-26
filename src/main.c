@@ -30,11 +30,11 @@ SPDX-License-Identifier: MIT
 
 /* === Headers files inclusions =============================================================== */
 
-#include "bsp.h"
-#include "reloj.h"
 #include "FreeRTOS.h"
-#include "task.h"
+#include "bsp.h"
 #include "event_groups.h"
+#include "reloj.h"
+#include "task.h"
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -52,21 +52,21 @@ SPDX-License-Identifier: MIT
 #define TIEMPO_POSPONER 5
 #endif
 
-#define EVENT_SETHORA_ON                (1 << 0)
-#define EVENT_SETALARM_ON               (1 << 1)
-#define EVENT_DEC_ON                    (1 << 2)
-#define EVENT_INC_ON                    (1 << 3)
-#define EVENT_CAN_ON                    (1 << 4)
-#define EVENT_ACP_ON                    (1 << 5)
+#define EVENT_SETHORA_ON (1 << 0)
+#define EVENT_SETALARM_ON (1 << 1)
+#define EVENT_DEC_ON (1 << 2)
+#define EVENT_INC_ON (1 << 3)
+#define EVENT_CAN_ON (1 << 4)
+#define EVENT_ACP_ON (1 << 5)
 
-#define EVENT_SETHORA_OFF               (1 << 6)
-#define EVENT_SETALARM_OFF              (1 << 7)
-#define EVENT_DEC_OFF                   (1 << 8)
-#define EVENT_INC_OFF                   (1 << 9)
-#define EVENT_CAN_OFF                   (1 << 10)
-#define EVENT_ACP_OFF                   (1 << 11)
+#define EVENT_SETHORA_OFF (1 << 6)
+#define EVENT_SETALARM_OFF (1 << 7)
+#define EVENT_DEC_OFF (1 << 8)
+#define EVENT_INC_OFF (1 << 9)
+#define EVENT_CAN_OFF (1 << 10)
+#define EVENT_ACP_OFF (1 << 11)
 
-#define EVENT_TIMEOUT_FINISHED          (1 << 12)
+#define EVENT_TIMEOUT_FINISHED (1 << 12)
 
 /* === Private data type declarations ========================================================== */
 
@@ -81,7 +81,7 @@ typedef enum {
 
 typedef struct estados_s {
     uint32_t key;
-    modo_t   modo;
+    modo_t modo;
 } * estados_s;
 
 /* === Private variable declarations =========================================================== */
@@ -132,12 +132,12 @@ EventGroupHandle_t key_events;
 
 /* === Private function implementation ========================================================= */
 
-void ActivarAlarma(clock_t reloj){
+void ActivarAlarma(clock_t reloj) {
     DigitalOutputActivate(board->buzzer);
     alarma_zumba = true;
 }
 
-void CambiarModo(modo_t valor){
+void CambiarModo(modo_t valor) {
     modo = valor;
     switch (modo) {
     case SIN_CONFIGURAR:
@@ -161,7 +161,7 @@ void CambiarModo(modo_t valor){
         DisplayDeactivateDot(board->display, 2);
         DisplayDeactivateDot(board->display, 3);
         break;
-        case AJUSTANDO_HORAS_ACTUALES:
+    case AJUSTANDO_HORAS_ACTUALES:
         DisplayFlashDigits(board->display, 0, 1, FREQ_PARPADEO);
         DisplayDeactivateDot(board->display, 0);
         DisplayDeactivateDot(board->display, 1);
@@ -202,62 +202,62 @@ void IncrementarBCD(uint8_t numero[2], const uint8_t limite[2]) {
 void DecrementarBCD(uint8_t numero[2], const uint8_t limite[2]) {
     numero[1]--;
     if (numero[1] > 9) {
-        numero[1] = 9; 
+        numero[1] = 9;
         numero[0]--;
     }
-    if ((numero[0] >= limite[0]) && numero[1] >= limite[1]) { 
-        numero[0] = limite[0]; 
-        numero[1] = limite[1]; 
+    if ((numero[0] >= limite[0]) && numero[1] >= limite[1]) {
+        numero[0] = limite[0];
+        numero[1] = limite[1];
     }
 }
 
 void StopByError(board_t board, uint8_t code) {
     switch (code) {
-        case 1:
-            DigitalOutputActivate(board->led_1);
-            break;
-        case 2:
-            DigitalOutputActivate(board->led_2);
-            break;
-        case 3:
-            DigitalOutputActivate(board->led_3);
-            break;
-        case 4:
-            DigitalOutputActivate(board->led_1);
-            DigitalOutputActivate(board->led_2);
-            break;
-        case 5:
-            DigitalOutputActivate(board->led_1);
-            DigitalOutputActivate(board->led_3);
-            break;
-        case 6:
-            DigitalOutputActivate(board->led_2);
-            DigitalOutputActivate(board->led_3);
-            break;
-        case 7:
-            DigitalOutputActivate(board->led_1);
-            DigitalOutputActivate(board->led_2);
-            DigitalOutputActivate(board->led_3);
-            break;    
-        default:
-            break;
+    case 1:
+        DigitalOutputActivate(board->led_1);
+        break;
+    case 2:
+        DigitalOutputActivate(board->led_2);
+        break;
+    case 3:
+        DigitalOutputActivate(board->led_3);
+        break;
+    case 4:
+        DigitalOutputActivate(board->led_1);
+        DigitalOutputActivate(board->led_2);
+        break;
+    case 5:
+        DigitalOutputActivate(board->led_1);
+        DigitalOutputActivate(board->led_3);
+        break;
+    case 6:
+        DigitalOutputActivate(board->led_2);
+        DigitalOutputActivate(board->led_3);
+        break;
+    case 7:
+        DigitalOutputActivate(board->led_1);
+        DigitalOutputActivate(board->led_2);
+        DigitalOutputActivate(board->led_3);
+        break;
+    default:
+        break;
     }
     while (true) {
     };
 }
 
-static void TickTask(void * object) { 
-    uint8_t  hora[6];
+static void TickTask(void * object) {
+    uint8_t hora[6];
     TickType_t last_value = xTaskGetTickCount();
     int ticks;
 
     while (true) {
         ticks = ClockTick(reloj);
-        if (ticks == TICKS_PER_SEC/2 || ticks == 0) {
-            if ( modo <= MOSTRANDO_HORA){
+        if (ticks == TICKS_PER_SEC / 2 || ticks == 0) {
+            if (modo <= MOSTRANDO_HORA) {
                 ClockGetTime(reloj, hora, sizeof(hora));
                 DisplayWriteBCD(board->display, hora, sizeof(hora));
-                if (modo == MOSTRANDO_HORA){
+                if (modo == MOSTRANDO_HORA) {
                     DisplayToggleDot(board->display, 1);
                 }
             }
@@ -268,15 +268,15 @@ static void TickTask(void * object) {
         vTaskDelayUntil(&last_value, pdMS_TO_TICKS(1));
     }
 }
- 
-static void RefreshTask(void * object) { 
+
+static void RefreshTask(void * object) {
     while (true) {
         DisplayRefresh(board->display);
         vTaskDelay(pdMS_TO_TICKS(1));
     };
 }
 
-static void ModeTask(void * object) { 
+static void ModeTask(void * object) {
     estados_s options = object;
 
     while (true) {
@@ -296,8 +296,8 @@ static void ModeTask(void * object) {
     };
 }
 
-static void KeyTask(void * object) { 
-    board_t  board = object;
+static void KeyTask(void * object) {
+    board_t board = object;
     uint32_t last_state, current_state, changes, events;
 
     while (true) {
@@ -323,7 +323,7 @@ static void KeyTask(void * object) {
             current_state |= EVENT_ACP_ON;
         }
 
-        changes    = current_state ^ last_state;
+        changes = current_state ^ last_state;
         last_state = current_state;
         events = (((changes << 6) & (!current_state << 6)) | (changes & current_state));
 
@@ -331,36 +331,36 @@ static void KeyTask(void * object) {
     }
 }
 
-static void ConfigTask (void * object) {
+static void ConfigTask(void * object) {
     estados_s options = object;
 
-    while(true){
+    while (true) {
         xEventGroupWaitBits(key_events, options->key, TRUE, FALSE, portMAX_DELAY);
         timeout_reset = true;
         if (DigitalInputGetState(board->aceptar)) {
-            if (!alarma_zumba){
-                if ( modo == MOSTRANDO_HORA){
-                    if (!ClockGetAlarm(reloj, hora_entrada, sizeof(hora_entrada))){
+            if (!alarma_zumba) {
+                if (modo == MOSTRANDO_HORA) {
+                    if (!ClockGetAlarm(reloj, hora_entrada, sizeof(hora_entrada))) {
                         ClockAlarmActivate(reloj);
                         DisplayActivateDot(board->display, 3);
                     }
-                }else if ( modo == AJUSTANDO_MINUTOS_ACTUALES){
+                } else if (modo == AJUSTANDO_MINUTOS_ACTUALES) {
                     CambiarModo(AJUSTANDO_HORAS_ACTUALES);
-                }else if ( modo == AJUSTANDO_HORAS_ACTUALES){
+                } else if (modo == AJUSTANDO_HORAS_ACTUALES) {
                     ClockSetTime(reloj, hora_entrada, sizeof(hora_entrada));
                     CambiarModo(MOSTRANDO_HORA);
-                    if (ClockGetAlarm(reloj, hora_entrada, sizeof(hora_entrada))){
+                    if (ClockGetAlarm(reloj, hora_entrada, sizeof(hora_entrada))) {
                         DisplayActivateDot(board->display, 3);
                     }
-                }else if ( modo == AJUSTANDO_MINUTOS_ALARMA){
+                } else if (modo == AJUSTANDO_MINUTOS_ALARMA) {
                     CambiarModo(AJUSTANDO_HORAS_ALARMA);
-                }else if ( modo == AJUSTANDO_HORAS_ALARMA){
+                } else if (modo == AJUSTANDO_HORAS_ALARMA) {
                     ClockSetAlarm(reloj, hora_entrada, sizeof(hora_entrada));
                     CambiarModo(MOSTRANDO_HORA);
                     ClockAlarmActivate(reloj);
                     DisplayActivateDot(board->display, 3);
                 }
-            }else {
+            } else {
                 DigitalOutputDeactivate(board->buzzer);
                 ClockPostponeAlarm(reloj, TIEMPO_POSPONER);
                 alarma_zumba = false;
@@ -368,29 +368,29 @@ static void ConfigTask (void * object) {
         }
 
         if (DigitalInputGetState(board->incrementar)) {
-            if ( (modo == AJUSTANDO_MINUTOS_ACTUALES) || (modo == AJUSTANDO_MINUTOS_ALARMA) ){
+            if ((modo == AJUSTANDO_MINUTOS_ACTUALES) || (modo == AJUSTANDO_MINUTOS_ALARMA)) {
                 IncrementarBCD(&hora_entrada[2], LIMITE_MINUTOS);
-            } else if ( (modo == AJUSTANDO_HORAS_ACTUALES) || (modo == AJUSTANDO_HORAS_ALARMA)){
+            } else if ((modo == AJUSTANDO_HORAS_ACTUALES) || (modo == AJUSTANDO_HORAS_ALARMA)) {
                 IncrementarBCD(hora_entrada, LIMITE_HORAS);
             }
 
-            if( (modo == AJUSTANDO_MINUTOS_ACTUALES) || (modo == AJUSTANDO_HORAS_ACTUALES)){
-                DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada)); 
-            } else if ( (modo == AJUSTANDO_HORAS_ALARMA) || (modo == AJUSTANDO_MINUTOS_ALARMA)){
+            if ((modo == AJUSTANDO_MINUTOS_ACTUALES) || (modo == AJUSTANDO_HORAS_ACTUALES)) {
+                DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada));
+            } else if ((modo == AJUSTANDO_HORAS_ALARMA) || (modo == AJUSTANDO_MINUTOS_ALARMA)) {
                 DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada));
             }
         }
 
         if (DigitalInputGetState(board->decrementar)) {
-            if ( (modo == AJUSTANDO_MINUTOS_ACTUALES) || (modo == AJUSTANDO_MINUTOS_ALARMA) ){
+            if ((modo == AJUSTANDO_MINUTOS_ACTUALES) || (modo == AJUSTANDO_MINUTOS_ALARMA)) {
                 DecrementarBCD(&hora_entrada[2], LIMITE_MINUTOS);
-            } else if ( (modo == AJUSTANDO_HORAS_ACTUALES) || (modo == AJUSTANDO_HORAS_ALARMA)){
+            } else if ((modo == AJUSTANDO_HORAS_ACTUALES) || (modo == AJUSTANDO_HORAS_ALARMA)) {
                 DecrementarBCD(hora_entrada, LIMITE_HORAS);
             }
 
-            if( (modo == AJUSTANDO_MINUTOS_ACTUALES) || (modo == AJUSTANDO_HORAS_ACTUALES)){
-                DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada)); 
-            } else if ( (modo == AJUSTANDO_HORAS_ALARMA) || (modo == AJUSTANDO_MINUTOS_ALARMA)){
+            if ((modo == AJUSTANDO_MINUTOS_ACTUALES) || (modo == AJUSTANDO_HORAS_ACTUALES)) {
+                DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada));
+            } else if ((modo == AJUSTANDO_HORAS_ALARMA) || (modo == AJUSTANDO_MINUTOS_ALARMA)) {
                 DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada));
             }
         }
@@ -413,30 +413,30 @@ static void TimeOutTask(void * object) {
         if (counter == 30) {
             xEventGroupSetBits(key_events, (EVENT_TIMEOUT_FINISHED | current_events));
         }
-    }   
+    }
 }
 
 static void CancelKeyTask(void * object) {
     while (true) {
         xEventGroupWaitBits(key_events, EVENT_CAN_ON | EVENT_TIMEOUT_FINISHED, TRUE, FALSE, portMAX_DELAY);
-            if ( !alarma_zumba){
-                if ( modo == MOSTRANDO_HORA){
-                    if (ClockGetAlarm(reloj, hora_entrada, sizeof(hora_entrada))){
-                        ClockStopAlarm(reloj);
-                        DisplayDeactivateDot(board->display, 3);
-                    }
-                }else {
-                    if ( ClockGetTime(reloj, hora_entrada, sizeof(hora_entrada))) {
-                        CambiarModo(MOSTRANDO_HORA);
-                    }else{
-                        CambiarModo(SIN_CONFIGURAR);
-                    }
+        if (!alarma_zumba) {
+            if (modo == MOSTRANDO_HORA) {
+                if (ClockGetAlarm(reloj, hora_entrada, sizeof(hora_entrada))) {
+                    ClockStopAlarm(reloj);
+                    DisplayDeactivateDot(board->display, 3);
                 }
-            }else {
-                ClockStopAlarm(reloj);
-                DigitalOutputDeactivate(board->buzzer);
-                alarma_zumba = false;
+            } else {
+                if (ClockGetTime(reloj, hora_entrada, sizeof(hora_entrada))) {
+                    CambiarModo(MOSTRANDO_HORA);
+                } else {
+                    CambiarModo(SIN_CONFIGURAR);
+                }
             }
+        } else {
+            ClockStopAlarm(reloj);
+            DigitalOutputDeactivate(board->buzzer);
+            alarma_zumba = false;
+        }
     }
 }
 
@@ -445,56 +445,56 @@ static void CancelKeyTask(void * object) {
 int main(void) {
     static struct estados_s estados[3];
 
-    reloj = ClockCreate(100, ActivarAlarma);
+    reloj = ClockCreate(1000, ActivarAlarma);
     board = BoardCreate();
 
     SysTick_Init(TICKS_PER_SEC);
     CambiarModo(SIN_CONFIGURAR);
 
     /* Configuracion de las tareas*/
-    estados[0].key        = EVENT_SETHORA_ON;
-    estados[0].modo       = AJUSTANDO_MINUTOS_ACTUALES;
-    estados[1].key        = EVENT_SETALARM_ON ;
-    estados[1].modo       = AJUSTANDO_MINUTOS_ALARMA;
-    estados[2].key        = EVENT_DEC_ON | EVENT_INC_ON | EVENT_CAN_ON | EVENT_ACP_ON ;
-    estados[2].modo       = MOSTRANDO_HORA;
+    estados[0].key = EVENT_SETHORA_ON;
+    estados[0].modo = AJUSTANDO_MINUTOS_ACTUALES;
+    estados[1].key = EVENT_SETALARM_ON;
+    estados[1].modo = AJUSTANDO_MINUTOS_ALARMA;
+    estados[2].key = EVENT_DEC_ON | EVENT_INC_ON | EVENT_CAN_ON | EVENT_ACP_ON;
+    estados[2].modo = MOSTRANDO_HORA;
 
-    key_events     = xEventGroupCreate();
+    key_events = xEventGroupCreate();
     if (key_events == NULL) {
         StopByError(board, 1);
     }
-    
+
     /* Tareas */
 
-    if (xTaskCreate(RefreshTask, "RefrescarPantalla", 256, NULL, tskIDLE_PRIORITY + 2, NULL) != pdPASS){
-        StopByError(board, 2);
-    }
-
-    if (xTaskCreate(KeyTask, "Teclas", 256, (void *)board, tskIDLE_PRIORITY + 1, NULL) != pdPASS){
-        StopByError(board, 3);
-    }
-
-    if (xTaskCreate(ModeTask, "CambiarHora", 256, &estados[0], tskIDLE_PRIORITY + 1, NULL) != pdPASS){
-        StopByError(board, 4);
-    }
-
-    if (xTaskCreate(ModeTask, "CambiarAlarma", 256, &estados[1], tskIDLE_PRIORITY + 1, NULL) != pdPASS){
-        StopByError(board, 4);
-    }
-
-    if (xTaskCreate(ConfigTask, "Configurar", 256, &estados[2], tskIDLE_PRIORITY + 1, NULL) != pdPASS){
-        StopByError(board, 5);
-    }
-
-    if (xTaskCreate(TickTask, "ClockTick", 256, NULL, tskIDLE_PRIORITY + 3, NULL) != pdPASS){
+    if (xTaskCreate(TickTask, "ClockTick", 256, NULL, tskIDLE_PRIORITY + 3, NULL) != pdPASS) {
         StopByError(board, 6);
     }
 
-    if (xTaskCreate(TimeOutTask, "Timer", 256, NULL, tskIDLE_PRIORITY + 1, NULL) != pdPASS){
+    if (xTaskCreate(RefreshTask, "RefrescarPantalla", 256, NULL, tskIDLE_PRIORITY + 2, NULL) != pdPASS) {
+        StopByError(board, 2);
+    }
+
+    if (xTaskCreate(KeyTask, "Teclas", 256, (void *)board, tskIDLE_PRIORITY + 1, NULL) != pdPASS) {
+        StopByError(board, 3);
+    }
+
+    if (xTaskCreate(ModeTask, "CambiarHora", 256, &estados[0], tskIDLE_PRIORITY + 1, NULL) != pdPASS) {
+        StopByError(board, 4);
+    }
+
+    if (xTaskCreate(ModeTask, "CambiarAlarma", 256, &estados[1], tskIDLE_PRIORITY + 1, NULL) != pdPASS) {
+        StopByError(board, 4);
+    }
+
+    if (xTaskCreate(ConfigTask, "Configurar", 256, &estados[2], tskIDLE_PRIORITY + 1, NULL) != pdPASS) {
+        StopByError(board, 5);
+    }
+
+    if (xTaskCreate(TimeOutTask, "Timer", 256, NULL, tskIDLE_PRIORITY + 1, NULL) != pdPASS) {
         StopByError(board, 7);
     }
 
-    if (xTaskCreate(CancelKeyTask, "Cancelar", 256, NULL, tskIDLE_PRIORITY + 1, NULL) != pdPASS){
+    if (xTaskCreate(CancelKeyTask, "Cancelar", 256, NULL, tskIDLE_PRIORITY + 1, NULL) != pdPASS) {
         StopByError(board, 5);
     }
 
