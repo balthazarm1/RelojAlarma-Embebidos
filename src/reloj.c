@@ -93,13 +93,18 @@ void ClockSetTime(clock_t reloj, const uint8_t * hora, int size) {
 }
 
 bool ClockGetAlarm(clock_t reloj, uint8_t * hora, int size) {
-    memcpy(hora, reloj->alarma_actual, size);
+    if (reloj->alarma_postergada == false){
+        memcpy(hora, reloj->alarma_actual, size);
+    }else {
+        memcpy(hora, reloj->alarma_reservada, size);
+    }
     return reloj->alarma_estado;
 }
 
 void ClockSetAlarm(clock_t reloj, const uint8_t * hora, int size) {
     memcpy(reloj->alarma_actual, hora, size);
     reloj->alarma_estado = true;
+    reloj->alarma_postergada = false;
 }
 
 void CheckAlarmActive(clock_t reloj) {
@@ -177,14 +182,19 @@ void SumarHorarios(uint8_t alarma_actual[], uint8_t time_post[], uint8_t resulta
 void ClockPostponeAlarm(clock_t reloj, uint8_t tiempo) {
     //uint8_t time_post[TIME_SIZE];
     //uint8_t time[TIME_SIZE];
-
-    memcpy(reloj->alarma_reservada, reloj->alarma_actual, TIME_SIZE);
-    reloj->alarma_postergada = true;
-    ClockAlarmActivate(reloj);
-    reloj->alarma_actual[3] += tiempo;
-    CONTROLAR_REBALSE_MIN(reloj->alarma_actual[2], reloj->alarma_actual[3],reloj->alarma_actual[1]);
-    CONTROLAR_REBALSE_HOR(reloj->alarma_actual[0], reloj->alarma_actual[1]);
-    //memcpy(reloj->alarma_actual, time, sizeof(time));
+    if (reloj->alarma_postergada == false){
+        memcpy(reloj->alarma_reservada, reloj->alarma_actual, TIME_SIZE);
+        reloj->alarma_postergada = true;
+        ClockAlarmActivate(reloj);
+        reloj->alarma_actual[3] += tiempo;
+        CONTROLAR_REBALSE_MIN(reloj->alarma_actual[2], reloj->alarma_actual[3],reloj->alarma_actual[1]);
+        CONTROLAR_REBALSE_HOR(reloj->alarma_actual[0], reloj->alarma_actual[1]);
+        //memcpy(reloj->alarma_actual, time, sizeof(time));
+    }else {
+        reloj->alarma_actual[3] += tiempo;
+        CONTROLAR_REBALSE_MIN(reloj->alarma_actual[2], reloj->alarma_actual[3],reloj->alarma_actual[1]);
+        CONTROLAR_REBALSE_HOR(reloj->alarma_actual[0], reloj->alarma_actual[1]);
+    }
 }
 
 int ClockTick(clock_t reloj) {
