@@ -45,7 +45,7 @@ SPDX-License-Identifier: MIT
 #endif
 
 #ifndef FREQ_PARPADEO
-#define FREQ_PARPADEO 50
+#define FREQ_PARPADEO 250
 #endif
 
 #ifndef TIEMPO_POSPONER
@@ -118,7 +118,7 @@ static clock_t reloj;
 
 static modo_t modo;
 
-static bool alarma_zumba; //esto acabo de observar
+static bool alarma_zumba;
 
 static int contador_timeout = 0;
 
@@ -272,7 +272,7 @@ static void TickTask(void * object) {
 static void RefreshTask(void * object) { 
     while (true) {
         DisplayRefresh(board->display);
-        vTaskDelay(pdMS_TO_TICKS(5));
+        vTaskDelay(pdMS_TO_TICKS(1));
     };
 }
 
@@ -282,19 +282,17 @@ static void ModeTask(void * object) {
     while (true) {
         xEventGroupWaitBits(key_events, options->key, TRUE, FALSE, portMAX_DELAY);
         vTaskDelay(pdMS_TO_TICKS(3000));
+        timeout_reset = true;
         if (DigitalInputGetState(board->set_hora)) {
-            timeout_reset = true;
             CambiarModo(AJUSTANDO_MINUTOS_ACTUALES);
             ClockGetTime(reloj, hora_entrada, sizeof(hora_entrada));
             DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada));
         }
         if (DigitalInputGetState(board->set_alarma)) {
-            timeout_reset = true;
             CambiarModo(AJUSTANDO_MINUTOS_ALARMA);
             ClockGetAlarm(reloj, hora_entrada, sizeof(hora_entrada));
             DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada));
         }
-        //vTaskDelay(pdMS_TO_TICKS(200));
     };
 }
 
@@ -333,15 +331,13 @@ static void KeyTask(void * object) {
     }
 }
 
-static void ConfigTask (void * object){
+static void ConfigTask (void * object) {
     estados_s options = object;
 
     while(true){
         xEventGroupWaitBits(key_events, options->key, TRUE, FALSE, portMAX_DELAY);
-        
+        timeout_reset = true;
         if (DigitalInputGetState(board->aceptar)) {
-            //xEventGroupWaitBits(key_events, EVENT_ACP_ON, TRUE, FALSE, portMAX_DELAY);
-            timeout_reset = true;
             if (!alarma_zumba){
                 if ( modo == MOSTRANDO_HORA){
                     if (!ClockGetAlarm(reloj, hora_entrada, sizeof(hora_entrada))){
@@ -371,9 +367,58 @@ static void ConfigTask (void * object){
             }
         }
 
-        xEventGroupWaitBits(key_events, EVENT_ACP_ON, TRUE, FALSE, portMAX_DELAY);
-        if (DigitalInputGetState(board->cancelar)) {
-            xEventGroupWaitBits(key_events, EVENT_CAN_ON, TRUE, FALSE, portMAX_DELAY);
+        if (DigitalInputGetState(board->incrementar)) {
+            if ( (modo == AJUSTANDO_MINUTOS_ACTUALES) || (modo == AJUSTANDO_MINUTOS_ALARMA) ){
+                IncrementarBCD(&hora_entrada[2], LIMITE_MINUTOS);
+            } else if ( (modo == AJUSTANDO_HORAS_ACTUALES) || (modo == AJUSTANDO_HORAS_ALARMA)){
+                IncrementarBCD(hora_entrada, LIMITE_HORAS);
+            }
+
+            if( (modo == AJUSTANDO_MINUTOS_ACTUALES) || (modo == AJUSTANDO_HORAS_ACTUALES)){
+                DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada)); 
+            } else if ( (modo == AJUSTANDO_HORAS_ALARMA) || (modo == AJUSTANDO_MINUTOS_ALARMA)){
+                DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada));
+            }
+        }
+
+        if (DigitalInputGetState(board->decrementar)) {
+            if ( (modo == AJUSTANDO_MINUTOS_ACTUALES) || (modo == AJUSTANDO_MINUTOS_ALARMA) ){
+                DecrementarBCD(&hora_entrada[2], LIMITE_MINUTOS);
+            } else if ( (modo == AJUSTANDO_HORAS_ACTUALES) || (modo == AJUSTANDO_HORAS_ALARMA)){
+                DecrementarBCD(hora_entrada, LIMITE_HORAS);
+            }
+
+            if( (modo == AJUSTANDO_MINUTOS_ACTUALES) || (modo == AJUSTANDO_HORAS_ACTUALES)){
+                DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada)); 
+            } else if ( (modo == AJUSTANDO_HORAS_ALARMA) || (modo == AJUSTANDO_MINUTOS_ALARMA)){
+                DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada));
+            }
+        }
+    }
+}
+
+static void TimeOutTask(void * object) {
+    EventBits_t current_events;
+    uint32_t counter;
+
+    while (true) {
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        current_events = xEventGroupGetBits(key_events);
+        if ((modo <= MOSTRANDO_HORA) || timeout_reset) {
+            counter = 0;
+            timeout_reset = false;
+        } else {
+            counter++;
+        }
+        if (counter == 30) {
+            xEventGroupSetBits(key_events, (EVENT_TIMEOUT_FINISHED | current_events));
+        }
+    }   
+}
+
+static void CancelKeyTask(void * object) {
+    while (true) {
+        xEventGroupWaitBits(key_events, EVENT_CAN_ON | EVENT_TIMEOUT_FINISHED, TRUE, FALSE, portMAX_DELAY);
             if ( !alarma_zumba){
                 if ( modo == MOSTRANDO_HORA){
                     if (ClockGetAlarm(reloj, hora_entrada, sizeof(hora_entrada))){
@@ -391,62 +436,8 @@ static void ConfigTask (void * object){
                 ClockStopAlarm(reloj);
                 DigitalOutputDeactivate(board->buzzer);
                 alarma_zumba = false;
-            };
-        }
-
-        xEventGroupWaitBits(key_events, options->key, TRUE, FALSE, portMAX_DELAY);
-        if (DigitalInputGetState(board->incrementar)) {
-            xEventGroupWaitBits(key_events, EVENT_INC_ON, TRUE, FALSE, portMAX_DELAY);
-            timeout_reset = true;
-            if ( (modo == AJUSTANDO_MINUTOS_ACTUALES) || (modo == AJUSTANDO_MINUTOS_ALARMA) ){
-                IncrementarBCD(&hora_entrada[2], LIMITE_MINUTOS);
-            } else if ( (modo == AJUSTANDO_HORAS_ACTUALES) || (modo == AJUSTANDO_HORAS_ALARMA)){
-                IncrementarBCD(hora_entrada, LIMITE_HORAS);
             }
-
-            if( (modo == AJUSTANDO_MINUTOS_ACTUALES) || (modo == AJUSTANDO_HORAS_ACTUALES)){
-                DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada)); 
-            } else if ( (modo == AJUSTANDO_HORAS_ALARMA) || (modo == AJUSTANDO_MINUTOS_ALARMA)){
-                DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada));
-            }
-        }
-
-        if (DigitalInputGetState(board->decrementar)) {
-            xEventGroupWaitBits(key_events, EVENT_DEC_ON, TRUE, FALSE, portMAX_DELAY);
-            timeout_reset = true;
-            if ( (modo == AJUSTANDO_MINUTOS_ACTUALES) || (modo == AJUSTANDO_MINUTOS_ALARMA) ){
-                DecrementarBCD(&hora_entrada[2], LIMITE_MINUTOS);
-            } else if ( (modo == AJUSTANDO_HORAS_ACTUALES) || (modo == AJUSTANDO_HORAS_ALARMA)){
-                DecrementarBCD(hora_entrada, LIMITE_HORAS);
-            }
-
-            if( (modo == AJUSTANDO_MINUTOS_ACTUALES) || (modo == AJUSTANDO_HORAS_ACTUALES)){
-                DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada)); 
-            } else if ( (modo == AJUSTANDO_HORAS_ALARMA) || (modo == AJUSTANDO_MINUTOS_ALARMA)){
-                DisplayWriteBCD(board->display, hora_entrada, sizeof(hora_entrada));
-            }
-        }
-        vTaskDelay(pdMS_TO_TICKS(100)); 
     }
-}
-
-static void TimeOutTask(void * object){
-    EventBits_t current_events;
-    uint32_t counter;
-
-    while (true) {
-        vTaskDelay(pdMS_TO_TICKS(1000));
-        current_events = xEventGroupGetBits(key_events);    //VER si puedo reducir esto
-        if ((modo <= MOSTRANDO_HORA) || timeout_reset) {
-            counter = 0;
-            timeout_reset = false;
-        } else {
-            counter++;
-        }
-        if (counter == 30) {
-            xEventGroupSetBits(key_events, (EVENT_TIMEOUT_FINISHED | current_events));
-        }
-    }   
 }
 
 /* === Public function implementation ========================================================= */
@@ -454,7 +445,7 @@ static void TimeOutTask(void * object){
 int main(void) {
     static struct estados_s estados[3];
 
-    reloj = ClockCreate(10, ActivarAlarma);
+    reloj = ClockCreate(100, ActivarAlarma);
     board = BoardCreate();
 
     SysTick_Init(TICKS_PER_SEC);
@@ -501,6 +492,10 @@ int main(void) {
 
     if (xTaskCreate(TimeOutTask, "Timer", 256, NULL, tskIDLE_PRIORITY + 1, NULL) != pdPASS){
         StopByError(board, 7);
+    }
+
+    if (xTaskCreate(CancelKeyTask, "Cancelar", 256, NULL, tskIDLE_PRIORITY + 1, NULL) != pdPASS){
+        StopByError(board, 5);
     }
 
     /* Arranga S.O*/
